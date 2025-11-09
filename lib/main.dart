@@ -5,24 +5,46 @@ void main() {
   runApp(MyApp());
 }
 
+// Warna coksu simpel
+const Color coksuPrimary = Color(0xFFD7B894);
+const Color coksuDark = Color(0xFFB48A67);
+const Color coksuBackground = Color(0xFFF7EFE6);
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Login App',
+      title: 'Login',
       theme: ThemeData(
-        primaryColor: Colors.teal,
-        scaffoldBackgroundColor: Colors.grey.shade100,
+        scaffoldBackgroundColor: coksuBackground,
+        primaryColor: coksuPrimary,
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.teal,
+          backgroundColor: coksuDark,
           foregroundColor: Colors.white,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          hintStyle: TextStyle(color: Colors.grey[500]),
+          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: coksuDark),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: coksuDark, width: 1.8),
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal,
+            backgroundColor: coksuDark,
             foregroundColor: Colors.white,
-            minimumSize: Size(double.infinity, 48),
+            minimumSize: Size(double.infinity, 45),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         ),
       ),
@@ -48,106 +70,91 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Login Page"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,  
-          child: SingleChildScrollView(
+      appBar: AppBar(title: Text("Login")),
+      body: Center(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          width: 380,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.88),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 6,
+                color: Colors.black12,
+                offset: Offset(0, 3),
+              )
+            ],
+          ),
+          child: Form(
+            key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-
-                // NAMA
-                Text("Nama Lengkap", style: TextStyle(fontSize: 16)),
+                
+                // Nama Lengkap
                 TextFormField(
                   controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: "Masukkan nama lengkap",
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: InputDecoration(hintText: "Nama Lengkap"),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Nama wajib diisi";
-                    }
-                    if (value.length < 3) {
-                      return "Nama minimal 3 huruf";
-                    }
+                    if (value == null || value.isEmpty) return "Wajib diisi";
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 14),
 
-                // EMAIL
-                Text("Email", style: TextStyle(fontSize: 16)),
+                // Email
                 TextFormField(
                   controller: emailController,
-                  decoration: InputDecoration(
-                    hintText: "Masukkan email",
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: InputDecoration(hintText: "Email"),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Email wajib diisi";
-                    }
-                    final regex = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$');
-                    if (!regex.hasMatch(value)) {
-                      return "Format email tidak valid";
-                    }
+                    if (value == null || value.isEmpty) return "Wajib diisi";
+                    final valid = RegExp(
+                      r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$',
+                    ).hasMatch(value);
+                    if (!valid) return "Format email salah";
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 14),
 
-                // PASSWORD
-                Text("Password", style: TextStyle(fontSize: 16)),
+                // Password
                 TextFormField(
                   controller: passwordController,
                   obscureText: !showPassword,
                   decoration: InputDecoration(
-                    hintText: "Masukkan password",
-                    border: OutlineInputBorder(),
+                    hintText: "Password",
                     suffixIcon: IconButton(
                       icon: Icon(
                         showPassword
                             ? Icons.visibility
                             : Icons.visibility_off,
+                        color: coksuDark,
                       ),
                       onPressed: () {
-                        setState(() {
-                          showPassword = !showPassword;
-                        });
+                        setState(() => showPassword = !showPassword);
                       },
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password wajib diisi";
-                    }
-                    if (value.length < 6) {
-                      return "Minimal 6 karakter";
-                    }
+                    if (value == null || value.isEmpty) return "Wajib diisi";
+                    if (value.length < 6) return "Minimal 6 karakter";
                     return null;
                   },
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: 20),
 
-                // TOMBOL LOGIN
                 ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Semua valid → simpan
                       SharedPreferences prefs =
                           await SharedPreferences.getInstance();
                       await prefs.setString("nama", nameController.text);
                       await prefs.setString("email", emailController.text);
-                      await prefs.setString("password", passwordController.text);
 
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
+                        MaterialPageRoute(builder: (_) => HomePage()),
                       );
                     }
                   },
@@ -180,8 +187,8 @@ class _HomePageState extends State<HomePage> {
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      nama = prefs.getString("nama") ?? "";
-      email = prefs.getString("email") ?? "";
+      nama = prefs.getString("nama") ?? "-";
+      email = prefs.getString("email") ?? "-";
     });
   }
 
@@ -189,40 +196,52 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home Page"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
-              await prefs.clear();
-
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
-                (route) => false,
-              );
-            },
-          )
-        ],
+        title: Text("Home"),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Selamat Datang,", style: TextStyle(fontSize: 22)),
-            SizedBox(height: 8),
-            Text(
-              nama,
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 4),
-            Text(
-              email,
-              style: TextStyle(fontSize: 18, color: Colors.grey[800]),
-            ),
-          ],
+        child: Container(
+          padding: EdgeInsets.all(22),
+          width: 350,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 6,
+                color: Colors.black12,
+                offset: Offset(0, 3),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                nama,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: coksuDark,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(email, style: TextStyle(color: Colors.grey[700])),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.clear();
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginPage()),
+                  );
+                },
+                child: Text("Logout"),
+              )
+            ],
+          ),
         ),
       ),
     );
